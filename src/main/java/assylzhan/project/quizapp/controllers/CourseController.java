@@ -28,4 +28,8 @@ public class CourseController {
             courseService.deleteCourse(course);
         }
     }
+    @GetMapping("/search")
+    public List<Course> searchCourses(@RequestParam("searchTerm") String searchTerm) {
+        return courseService.findCourseByName(searchTerm);
+    }
 }

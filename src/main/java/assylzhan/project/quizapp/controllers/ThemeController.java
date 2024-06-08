@@ -40,4 +40,27 @@ public class ThemeController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Theme> updateTheme(@PathVariable Long id, @RequestBody Theme updatedTheme) {
+        Theme existingTheme = themeService.getById(id);
+        if (existingTheme == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        existingTheme.setName(updatedTheme.getName());
+        existingTheme.setDescription(updatedTheme.getDescription());
+        Theme savedTheme = themeService.updateTheme(existingTheme);
+        return new ResponseEntity<>(savedTheme, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTheme(@PathVariable Long id) {
+        themeService.removeThemeFromCourses(id);
+        themeService.deleteTheme(id);
+    }
+
+    @GetMapping("/search")
+    public List<Theme> searchCourses(@RequestParam("searchTerm") String searchTerm) {
+        return themeService.findThemeByName(searchTerm);
+    }
 }

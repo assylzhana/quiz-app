@@ -18,6 +18,7 @@ public class Theme {
     private String name;
     private String description;
 
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<Paragraph> paragraphList ;
 }

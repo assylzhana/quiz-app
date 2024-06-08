@@ -30,7 +30,7 @@
                     <a class="nav-link" href="/support">Support</a>
                 </li>
             </ul>
-            <form class="d-flex" role="search">
+            <form class="d-flex" role="search"  method="get" onsubmit="searchThemes(event)">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                 <button style="border-color: #2F2822FF" class="btn" type="submit">Search</button>
             </form>
@@ -43,6 +43,7 @@
     <div class="card" style="width: 18rem;">
         <div class="card-body">
             <h5 class="card-title" th:text="${course.name}"></h5>
+            <input type="hidden" id="courseName" th:value="${course.name}">
             <p class="card-text" th:text="${course.explanation}"></p>
             <a href="/course" class="card-link">Go to the dashboard</a>
         </div>
@@ -84,6 +85,34 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editModalLabel">Edit Theme</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editThemeId">
+
+                <div class="mb-3">
+                    <label class="form-label">Theme name</label>
+                    <input type="text" class="form-control" name="editThemeName" id="editThemeName">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Theme Description</label>
+                    <textarea class="form-control" name="editThemeDescription" id="editThemeDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updateTheme()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container" style="width: 800px;">
     <div id="themesContainer">
         <!-- Themes will be dynamically loaded here -->
@@ -101,7 +130,6 @@
             return;
         }
 
-        // Fetch existing themes to check for uniqueness
         let req = new XMLHttpRequest();
         req.open("GET", "/theme/" + courseId);
         req.send();
@@ -110,7 +138,6 @@
                 let themes = JSON.parse(req.responseText);
                 let isUnique = true;
 
-                // Check if theme name or description already exists
                 for (let i = 0; i < themes.length; i++) {
                     if (themes[i].name === themeName || themes[i].description === themeDescription) {
                         isUnique = false;
@@ -136,11 +163,9 @@
                             let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
                             modal.hide();
 
-                            // Clear input fields
                             document.getElementById('themeName').value = "";
                             document.getElementById('themeDescription').value = "";
 
-                            // Reload themes
                             loadThemes();
                         } else {
                             alert("Error adding the theme. Please try again.");
@@ -157,19 +182,23 @@
 
     function loadThemes() {
         let courseId = document.getElementById('courseId').value;
+        let courseName = document.getElementById('courseName').value;
         let req = new XMLHttpRequest();
         req.open("GET", "/theme/" + courseId);
         req.send();
         req.onload = function () {
             if (req.status >= 200 && req.status < 300) {
                 let themes = JSON.parse(req.responseText);
+                themes.sort((a, b) => a.id - b.id);
                 let html = "";
                 for (let i = 0; i < themes.length; i++) {
-                    html += "<a style=\"text-decoration: none\">";
+                    html += "<a style=\"text-decoration: none\" href=\"/course/" + courseName + "/" + themes[i].name + "\">";
                     html += "<div class=\"card\">";
                     html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
                     html += "<strong class=\"card-title\">" + (i + 1) + "|</strong>";
                     html += "<span class=\"card-text\">" + themes[i].name + "</span>";
+                    html += "<a class=\"btn btn-warning btn-sm\" style=\"float: right\" onclick=\"deleteTheme(" + themes[i].id + ")\">Delete</a>";
+                    html += "<a class=\"btn btn-success btn-sm\"style=\"float: right\" onclick=\"editTheme(" + themes[i].id + ", '" + themes[i].name + "', '" + themes[i].description + "')\">Edit</a>";
                     html += "</div>";
                     html += "</div>";
                     html += "</a>";
@@ -181,6 +210,108 @@
             }
         }
     }
+    function deleteTheme(id) {
+        if (confirm("Are you sure you want to delete this course?")) {
+            fetch('/theme/' + id, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        loadThemes();
+                    } else {
+                        alert("Error deleting the course. Please try again.");
+                    }
+                });
+        }
+    }
+    function editTheme(id, name, description) {
+        let editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+        document.getElementById('editThemeId').value = id || "";
+        document.getElementById('editThemeName').value = name || "";
+        document.getElementById('editThemeDescription').value = description || "";
+
+        editModal.show();
+    }
+
+
+
+    function updateTheme() {
+        let id = document.getElementById('editThemeId').value;
+        let name = document.getElementById('editThemeName').value;
+        let description = document.getElementById('editThemeDescription').value;
+
+        let theme = {
+            "id": id,
+            "name": name,
+            "description": description
+        };
+
+        fetch('/theme/' + id, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(theme)
+        })
+            .then(response => {
+                if (response.ok) {
+                    let editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    editModal.hide();
+                    loadThemes();
+                } else {
+                    alert("Error updating the theme. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error updating the theme. Please try again.");
+            });
+    }
+    function searchThemes(event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+
+        let searchTerm = document.querySelector('input[type="search"]').value.trim();
+
+        if (searchTerm !== "") {
+            fetch('/theme/search?searchTerm=' + encodeURIComponent(searchTerm))
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to search themes');
+                    }
+                })
+                .then(themes => {
+                    displaySearchResults(themes);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to search themes. Please try again.');
+                });
+        } else {
+            loadThemes();
+        }
+    }
+
+    function displaySearchResults(themes) {
+        let html = "";
+        themes.forEach(theme => {
+            html += "<a style=\"text-decoration: none\" href=\"/course/" + theme.courseName + "/" + theme.name + "\">";
+            html += "<div class=\"card\">";
+            html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
+            html += "<strong class=\"card-title\">" + theme.name + "</strong>";
+            html += "<p class=\"card-text\">" + theme.description + "</p>";
+            html += "</div>";
+            html += "</div>";
+            html += "</a>";
+            html += "<br>";
+        });
+        document.getElementById('themesContainer').innerHTML = html;
+    }
+
+
+
 </script>
 </body>
 </html>
