@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-99a2EBJxx5j+3OKPH6hdvds2PJPLsO9s0AF0gflzfs9+U3b0OYon4b45Hphb3aZQ" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <style>
+        .fixed-card {
+            height: 270px;
+            width: 100%;
+            margin: 0 20px 20px 0;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body onload="loadCourses()">
+
+<nav class="navbar navbar-expand-lg" style="background-color: #f15b2a">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">BrainBoost</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/panel">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link">Academic News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/support">Support</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchTerm">
+                <button style="border-color: #2F2822FF" class="btn" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<br>
+
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addModalLabel">New Course</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Course name</label>
+                    <input type="text" class="form-control" name="name" id="name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Course Explanation</label>
+                    <input type="text" class="form-control" name="explanation" id="explanation">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addCourse()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" >
+
+    <button type="button" class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#addModal">
+        Add new Course
+    </button>
+    <br>
+    <div class="row" id="courseData">
+
+    </div>
+</div>
+
+<script>
+    function loadCourses() {
+        let html = ""
+        let req = new XMLHttpRequest();
+        req.open("GET", "/course/view");
+        req.send();
+        req.onload = function () {
+            let courses = JSON.parse(req.responseText);
+            for (let i = 0; i < courses.length; i++) {
+                html += "<div class=\"col-md-4 mb-4\">";
+                html += "<div class=\"card text-center fixed-card\">";
+                html += "<div class=\"card-header\" style=\"color: #f15b2a\">" + (i + 1) + "</div>";
+                html += "<div class=\"card-body\">";
+                html += "<h5 class=\"card-title\">" + courses[i].name + "</h5>";
+                html += "<p class=\"card-text\">" + courses[i].explanation + "</p>";
+                html += "</div>";
+                html += "<div class=\"card-footer text-muted\">";
+                html += "<a class=\"btn btn-warning btn-sm\" onclick=\"deleteCourse(" + courses[i].id + ")\">Delete</a>";
+                html += "<a class=\"btn btn-success btn-sm\" href=\"/course/"+courses[i].name+"\">Start</a>";
+                html += "</div>";
+                html += "</div>";
+                html += "</div>";
+            }
+            document.getElementById('courseData').innerHTML = html;
+        }
+    }
+
+    function addCourse(){
+        let name = document.getElementById('name').value;
+        let explanation = document.getElementById('explanation').value;
+
+        if (name.trim() === "" || explanation.trim() === "") {
+            alert("Please fill out both course name and explanation.");
+            return;
+        }
+
+        let course = {
+            "name": name,
+            "explanation": explanation
+        };
+
+        let req = new XMLHttpRequest();
+        req.open("POST", "/course");
+        req.setRequestHeader("Content-type", "application/json");
+        req.send(JSON.stringify(course));
+
+        req.onload = function () {
+            if (req.status === 200) {
+                $('#addModal').modal('hide');
+                document.getElementById('name').value = "";
+                document.getElementById('explanation').value = "";
+                loadCourses();
+            } else {
+                alert("Error adding the course. Please try again.");
+            }
+        }
+    }
+
+    function deleteCourse(id) {
+        if (confirm("Are you sure you want to delete this course?")) {
+            let req = new XMLHttpRequest();
+            req.open("DELETE", "/course/" + id);
+            req.send();
+            req.onload = function () {
+                if (req.status === 200) {
+                    loadCourses();
+                } else {
+                    alert("Error deleting the course. Please try again.");
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <style>
+        .card:hover {
+            border-color: #f15b2a;
+        }
+        a.card-link {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body onload="loadThemes()">
+<nav class="navbar navbar-expand-lg" style="background-color: #f15b2a">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">BrainBoost</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/panel">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/support">Support</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button style="border-color: #2F2822FF" class="btn" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<br>
+
+<center>
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title" th:text="${course.name}"></h5>
+            <p class="card-text" th:text="${course.explanation}"></p>
+            <a href="/course" class="card-link">Go to the dashboard</a>
+        </div>
+    </div>
+</center>
+<br>
+<center>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        Add new Theme
+    </button>
+</center>
+<br><br>
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addModalLabel">New Theme</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="courseId" th:value="${course.id}">
+
+                <div class="mb-3">
+                    <label class="form-label">Theme name</label>
+                    <input type="text" class="form-control" name="themeName" id="themeName">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Theme Description</label>
+                    <textarea class="form-control" name="themeDescription" id="themeDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addTheme()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="width: 800px;">
+    <div id="themesContainer">
+        <!-- Themes will be dynamically loaded here -->
+    </div>
+</div>
+
+<script>
+    function addTheme() {
+        let courseId = document.getElementById('courseId').value;
+        let themeName = document.getElementById('themeName').value;
+        let themeDescription = document.getElementById('themeDescription').value;
+
+        if (themeName.trim() === "" || themeDescription.trim() === "") {
+            alert("Please fill out both theme name and description.");
+            return;
+        }
+
+        // Fetch existing themes to check for uniqueness
+        let req = new XMLHttpRequest();
+        req.open("GET", "/theme/" + courseId);
+        req.send();
+        req.onload = function () {
+            if (req.status >= 200 && req.status < 300) {
+                let themes = JSON.parse(req.responseText);
+                let isUnique = true;
+
+                // Check if theme name or description already exists
+                for (let i = 0; i < themes.length; i++) {
+                    if (themes[i].name === themeName || themes[i].description === themeDescription) {
+                        isUnique = false;
+                        break;
+                    }
+                }
+
+                if (isUnique) {
+                    // Add new theme
+                    let theme = {
+                        "name": themeName,
+                        "description": themeDescription
+                    };
+
+                    let postReq = new XMLHttpRequest();
+                    postReq.open("POST", "/theme/" + courseId);
+                    postReq.setRequestHeader("Content-type", "application/json");
+                    postReq.send(JSON.stringify(theme));
+
+                    postReq.onload = function () {
+                        if (postReq.status >= 200 && postReq.status < 300) {
+                            // Close the modal
+                            let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+                            modal.hide();
+
+                            // Clear input fields
+                            document.getElementById('themeName').value = "";
+                            document.getElementById('themeDescription').value = "";
+
+                            // Reload themes
+                            loadThemes();
+                        } else {
+                            alert("Error adding the theme. Please try again.");
+                        }
+                    }
+                } else {
+                    alert("Theme name or description already exists. Please provide unique values.");
+                }
+            } else {
+                alert("Error fetching themes. Please try again.");
+            }
+        }
+    }
+
+    function loadThemes() {
+        let courseId = document.getElementById('courseId').value;
+        let req = new XMLHttpRequest();
+        req.open("GET", "/theme/" + courseId);
+        req.send();
+        req.onload = function () {
+            if (req.status >= 200 && req.status < 300) {
+                let themes = JSON.parse(req.responseText);
+                let html = "";
+                for (let i = 0; i < themes.length; i++) {
+                    html += "<a style=\"text-decoration: none\">";
+                    html += "<div class=\"card\">";
+                    html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
+                    html += "<strong class=\"card-title\">" + (i + 1) + "|</strong>";
+                    html += "<span class=\"card-text\">" + themes[i].name + "</span>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "</a>";
+                    html += "</br>";
+                }
+                document.getElementById('themesContainer').innerHTML = html;
+            } else {
+                alert("Error loading themes. Please try again.");
+            }
+        }
+    }
+</script>
+</body>
+</html>
