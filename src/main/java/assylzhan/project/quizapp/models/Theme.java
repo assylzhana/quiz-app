@@ -1,5 +1,6 @@
 package assylzhan.project.quizapp.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Theme {
     private String description;
 
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Paragraph> paragraphList ;
+    @OneToMany(mappedBy = "theme", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Paragraph> paragraphList;
 }

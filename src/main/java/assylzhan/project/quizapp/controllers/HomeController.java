@@ -63,9 +63,24 @@ public class HomeController {
                             @PathVariable(name = "themeName") String themeName,
                             Model model) {
         Course course = courseService.getCourseByName(courseName);
+        if (course == null) {
+            System.err.println("Course not found: " + courseName);
+            return "error";
+        }
         Theme theme = themeService.findThemeCourse(themeName, course);
+        if (theme == null) {
+            System.err.println("Theme not found: " + themeName);
+            return "error";
+        }
         model.addAttribute("course", course);
         model.addAttribute("theme", theme);
         return "paragraphs";
+    }
+
+    @GetMapping("/course/{courseName}/{themeName}/{paragraphName}")
+    public String paragraph(@PathVariable(name = "courseName") String courseName,
+                            @PathVariable(name = "themeName") String themeName,@PathVariable(name = "paragraphName") String paragraphName,
+                            Model model){
+        return "support";
     }
 }

@@ -55,4 +55,12 @@ public class ThemeService {
     public Theme findThemeCourse(String themeName, Course course) {
         return themeRepository.findByNameCourse(themeName, course.getName());
     }
+
+    public void saveTheme(Theme theme) {
+         themeRepository.save(theme);
+    }
+
+    public Theme findThemeById(Long themeId) {
+        return themeRepository.findById(themeId).orElse(null);
+    }
 }

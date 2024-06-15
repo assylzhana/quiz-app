@@ -159,13 +159,10 @@
 
                     postReq.onload = function () {
                         if (postReq.status >= 200 && postReq.status < 300) {
-                            // Close the modal
                             let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
                             modal.hide();
-
                             document.getElementById('themeName').value = "";
                             document.getElementById('themeDescription').value = "";
-
                             loadThemes();
                         } else {
                             alert("Error adding the theme. Please try again.");
@@ -198,7 +195,7 @@
                     html += "<strong class=\"card-title\">" + (i + 1) + "|</strong>";
                     html += "<span class=\"card-text\">" + themes[i].name + "</span>";
                     html += "<a class=\"btn btn-warning btn-sm\" style=\"float: right\" onclick=\"deleteTheme(" + themes[i].id + ")\">Delete</a>";
-                    html += "<a class=\"btn btn-success btn-sm\"style=\"float: right\" onclick=\"editTheme(" + themes[i].id + ", '" + themes[i].name + "', '" + themes[i].description + "')\">Edit</a>";
+                    html += "<a class=\"btn btn-success btn-sm\" style=\"float: right\" onclick=\"editTheme(" + themes[i].id + ", '" + themes[i].name + "', '" + themes[i].description + "')\">Edit</a>";
                     html += "</div>";
                     html += "</div>";
                     html += "</a>";

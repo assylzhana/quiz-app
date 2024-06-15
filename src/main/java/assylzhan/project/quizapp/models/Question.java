@@ -1,5 +1,6 @@
 package assylzhan.project.quizapp.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,4 +27,9 @@ public class Question {
 
     @Column(name = "correct_answer_order", nullable = false)
     private int correctAnswerOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "paragraph_id")
+    @JsonBackReference
+    private Paragraph paragraph;
 }

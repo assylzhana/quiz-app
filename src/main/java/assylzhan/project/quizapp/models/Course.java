@@ -1,5 +1,6 @@
 package assylzhan.project.quizapp.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,5 +22,6 @@ public class Course {
     private String explanation;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Theme> themeList ;
 }
