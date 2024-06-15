@@ -1,6 +1,7 @@
 package assylzhan.project.quizapp.controllers;
 
 import assylzhan.project.quizapp.models.Course;
+import assylzhan.project.quizapp.models.Paragraph;
 import assylzhan.project.quizapp.models.Theme;
 import assylzhan.project.quizapp.services.CourseService;
 import assylzhan.project.quizapp.services.ParagraphService;
@@ -77,10 +78,11 @@ public class HomeController {
         return "paragraphs";
     }
 
-    @GetMapping("/course/{courseName}/{themeName}/{paragraphName}")
-    public String paragraph(@PathVariable(name = "courseName") String courseName,
-                            @PathVariable(name = "themeName") String themeName,@PathVariable(name = "paragraphName") String paragraphName,
+    @GetMapping("/quiz/{paragraphName}")
+    public String paragraph(@PathVariable(name = "paragraphName") String paragraphName,
                             Model model){
-        return "support";
+        Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
+        model.addAttribute("paragraph", paragraph);
+        return "paragraph";
     }
 }

@@ -52,4 +52,8 @@ public class ParagraphService {
     public void deleteParagraph(Long id) {
         paragraphRepository.deleteById(id);
     }
+
+    public Paragraph getParagraphByName(String paragraphName) {
+        return paragraphRepository.findByName(paragraphName);
+    }
 }

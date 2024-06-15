@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ParagraphRepository extends JpaRepository<Paragraph,Long> {
-    void findByName(String name);
+    Paragraph findByName(String name);
 
     List<Paragraph> findAllByName(String searchTerm);
 }
