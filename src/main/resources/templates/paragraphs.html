@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <style>
+        .card:hover {
+            border-color: #f15b2a;
+        }
+        a.card-link {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body onload="loadParagraphs()">
+<nav class="navbar navbar-expand-lg" style="background-color: #f15b2a">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">BrainBoost</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/panel">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/support">Support</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search" onsubmit="searchParagraphs(event)">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button style="border-color: #2F2822FF" class="btn" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<br>
+
+<center>
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title" th:text="${theme.name}"></h5>
+            <input type="hidden" id="themeIdValue" th:value="${theme.id}">
+            <p class="card-text" th:text="${theme.description}"></p>
+            <a href="/course" class="card-link">Go to the dashboard</a>
+        </div>
+    </div>
+</center>
+
+<br>
+<center>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        Add new Paragraph
+    </button>
+</center>
+<br><br>
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addModalLabel">New Paragraph</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="addModalThemeIdValue" th:value="${theme.id}">
+
+                <div class="mb-3">
+                    <label class="form-label">Paragraph</label>
+                    <input type="text" class="form-control" name="paragraphName" id="paragraphName">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Paragraph Description</label>
+                    <textarea class="form-control" name="paragraphDescription" id="paragraphDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addParagraph()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editModalLabel">Edit Paragraph</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editModalParagraphId">
+
+                <div class="mb-3">
+                    <label class="form-label">Paragraph name</label>
+                    <input type="text" class="form-control" name="editParagraphName" id="editParagraphName">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Paragraph Description</label>
+                    <textarea class="form-control" name="editParagraphDescription" id="editParagraphDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updateParagraph()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="width: 800px;">
+    <div id="paragraphContainer">
+        <!-- Paragraphs will be dynamically loaded here -->
+    </div>
+</div>
+
+<script >
+    function loadParagraphs() {
+        let themeId = document.getElementById('themeIdValue').value;
+
+        fetch('/paragraph/' + themeId)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error loading paragraphs');
+                }
+            })
+            .then(paragraphs => {
+                displayParagraphs(paragraphs);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function displayParagraphs(paragraphs) {
+        paragraphs.sort((a, b) => a.id - b.id);
+        let html = "";
+        let i = 1;
+
+        paragraphs.forEach(paragraph => {
+            html += "<a style=\"text-decoration: none\"  href=\"/quiz/"   +  paragraph.name + "\">";
+            html += "<div class=\"card\">";
+            html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
+            html += "<strong class=\"card-title\">" + (i++) + "|</strong>";
+            html += "<span class=\"card-text\">" + paragraph.name + "</span>";
+            html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraph.id + ")'>Delete</a>";
+            html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\")'>Edit</a>";
+            html += "</div>";
+            html += "</div>";
+            html += "</a>";
+            html += "</br>";
+        });
+        document.getElementById('paragraphContainer').innerHTML = html;
+    }
+
+
+    function addParagraph() {
+        let themeId = document.getElementById('addModalThemeIdValue').value;
+        let paragraphName = document.getElementById('paragraphName').value;
+        let paragraphDescription = document.getElementById('paragraphDescription').value;
+
+        if (paragraphName.trim() === "" || paragraphDescription.trim() === "") {
+            alert("Please fill out both paragraph name and description.");
+            return;
+        }
+
+        let paragraph = {
+            "name": paragraphName,
+            "description": paragraphDescription
+        };
+
+        fetch('/paragraph/' + themeId + '/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paragraph)
+        })
+            .then(response => {
+                if (response.ok) {
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+                    modal.hide();
+
+                    document.getElementById('paragraphName').value = "";
+                    document.getElementById('paragraphDescription').value = "";
+                    loadParagraphs();
+                } else {
+                    alert("Error adding the paragraph. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error adding the paragraph. Please try again.");
+            });
+    }
+
+    function deleteParagraph(paragraphId) {
+        if (confirm("Are you sure you want to delete this paragraph?")) {
+            fetch('/paragraph/' + paragraphId, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        loadParagraphs(); // Reload paragraphs after deletion
+                    } else {
+                        alert("Error deleting the paragraph. Please try again.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Error deleting the paragraph. Please try again.");
+                });
+        }
+    }
+    function editParagraph(paragraphId, paragraphName, paragraphDescription) {
+        document.getElementById('editModalParagraphId').value = paragraphId;
+        document.getElementById('editParagraphName').value = paragraphName;
+        document.getElementById('editParagraphDescription').value = paragraphDescription;
+
+        let editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        editModal.show();
+    }
+    function updateParagraph() {
+        let paragraphId = document.getElementById('editModalParagraphId').value;
+        let updatedParagraphName = document.getElementById('editParagraphName').value;
+        let updatedParagraphDescription = document.getElementById('editParagraphDescription').value;
+
+        if (updatedParagraphName.trim() === "" || updatedParagraphDescription.trim() === "") {
+            alert("Please fill out both paragraph name and description.");
+            return;
+        }
+
+        let updatedParagraph = {
+            "name": updatedParagraphName,
+            "description": updatedParagraphDescription
+        };
+        fetch('/paragraph/' + paragraphId, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedParagraph)
+        })
+            .then(response => {
+                if (response.ok) {
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                    loadParagraphs(); // Reload paragraphs after update
+                } else {
+                    alert("Error updating the paragraph. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error updating the paragraph. Please try again.");
+            });
+    }
+    function searchParagraphs(event) {
+        event.preventDefault();
+        let searchTerm = document.querySelector('input[type="search"]').value.trim();
+        if (searchTerm !== "") {
+            fetch('/paragraph/search?searchTerm=' + searchTerm)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Error searching paragraphs');
+                    }
+                })
+                .then(paragraphs => {
+                    displayParagraphs(paragraphs);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        } else {
+            loadParagraphs();
+        }
+    }
+</script>
+
+</body>
+</html>
+
+
