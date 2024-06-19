@@ -58,4 +58,8 @@ public class QuestionService {
     public List<Question> getQuestionsForUser(Integer numOfQuestions, Long paragraphId) {
         return questionRepository.findRandomQuestions(numOfQuestions, paragraphId);
     }
+
+    public List<Question> getAllQuestionsByParagraphId(Long id) {
+        return questionRepository.findAllByParagraphId(id);
+    }
 }

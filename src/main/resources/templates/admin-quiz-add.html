@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Quiz Add</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Admin Quiz Add</h1>
+    <h2 class="text-center">The questions for paragraph: <span th:text="${paragraph.name}"></span></h2>
+    <input type="hidden" id="paragraphId" th:value="${paragraph.id}">
+
+    <form id="question-form" class="mt-4">
+        <div class="form-group">
+            <label for="question-text">Question</label>
+            <input type="text" class="form-control" id="question-text" required>
+        </div>
+        <div class="form-group">
+            <label for="question-time">Time (minutes)</label>
+            <input type="number" class="form-control" id="question-time" required>
+        </div>
+        <div class="form-group">
+            <label for="question-type">Question Type</label>
+            <select class="form-control" id="question-type" required>
+                <option value="Multiple choice">Multiple choice</option>
+                <option value="True/false">True/false</option>
+            </select>
+        </div>
+        <div class="form-group" id="choices-container">
+            <label>Choices</label>
+            <div class="choice-item">
+                <input type="text" class="form-control mb-2" name="choices[]" placeholder="Choice text" required>
+                <input type="checkbox" class="ml-2" name="correctChoices[]" value="0"> Correct
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary" id="add-choice-btn">Add Choice</button>
+        <button type="submit" class="btn btn-primary mt-3" id="save-question-btn">Save Question</button>
+    </form>
+
+    <table class="table table-striped mt-5">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Text</th>
+            <th>Variants</th>
+            <th>Time</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="questions-table-body">
+
+        </tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function() {
+        const paragraphId = document.getElementById('paragraphId').value;
+        function fetchQuestions() {
+            $.ajax({
+                url: `/quiz/view`,
+                type: 'GET',
+                data: { paragraphId: paragraphId },
+                success: function(data) {
+                    $('#questions-table-body').empty();
+                    data.forEach(function(question) {
+                        const choicesHtml = question.choices.map((choice, index) => {
+                            const isCorrect = question.correctAnswers.includes(choice);
+                            const choiceClass = isCorrect ? 'text-success' : '';
+                            return `<li class="list-group-item ${choiceClass}">${choice}</li>`;
+                        }).join('');
+                        const questionHtml = `
+                            <tr>
+                                <td>${question.id}</td>
+                                <td>${question.question}</td>
+                                <td><ul class="list-group">${choicesHtml}</ul></td>
+                                <td>${question.time} minutes</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm edit-btn" data-id="${question.id}">Edit</button>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="${question.id}">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                        $('#questions-table-body').append(questionHtml);
+                    });
+                },
+                error: function(error) {
+                    console.log('Error fetching questions:', error);
+                }
+            });
+        }
+        fetchQuestions();
+        $('#add-choice-btn').click(function() {
+            const choiceHtml = `
+                <div class="choice-item">
+                    <input type="text" class="form-control mb-2" name="choices[]" placeholder="Choice text" required>
+                    <input type="checkbox" class="ml-2" name="correctChoices[]" value="0"> Correct
+                </div>
+            `;
+            $('#choices-container').append(choiceHtml);
+        });
+
+        $('#question-form').submit(function(event) {
+            event.preventDefault();
+            const questionData = {
+                question: $('#question-text').val(),
+                time: $('#question-time').val(),
+                questionType: $('#question-type').val(),
+                choices: [],
+                correctAnswers: [],
+                paragraphId: $('#paragraphId').val()
+            };
+            $('#choices-container .choice-item').each(function(index) {
+                const choiceText = $(this).find('input[type="text"]').val();
+                questionData.choices.push(choiceText);
+                if ($(this).find('input[type="checkbox"]').is(':checked')) {
+                    questionData.correctAnswers.push(choiceText);
+                }
+            });
+
+            const questionId = $(this).data('questionId');
+            const paragraphId = document.getElementById('paragraphId').value;
+            const url = questionId ? `/quiz/question/${questionId}/update` : `/quiz/${paragraphId}/create`;
+            const method = questionId ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(questionData),
+                success: function(response) {
+                    fetchQuestions();
+                    $('#question-form')[0].reset();
+                    $('#question-form').removeData('questionId');
+                },
+                error: function(error) {
+                    console.log('Error saving question:', error);
+                }
+            });
+        });
+
+        $(document).on('click', '.edit-btn', function() {
+            const questionId = $(this).data('id');
+            $.ajax({
+                url: `/quiz/question/${questionId}`,
+                type: 'GET',
+                success: function(question) {
+                    $('#question-form').data('questionId', question.id);
+                    $('#question-text').val(question.question);
+                    $('#question-time').val(question.time);
+                    $('#question-type').val(question.questionType);
+
+                    $('#choices-container').empty();
+                    question.choices.forEach((choice, index) => {
+                        const isCorrect = question.correctAnswers.includes(choice);
+                        const choiceHtml = `
+                            <div class="choice-item">
+                                <input type="text" class="form-control mb-2" name="choices[]" value="${choice}" required>
+                                <input type="checkbox" class="ml-2" name="correctChoices[]" value="${index}" ${isCorrect ? 'checked' : ''}> Correct
+                            </div>
+                        `;
+                        $('#choices-container').append(choiceHtml);
+                    });
+                },
+                error: function(error) {
+                    console.log('Error fetching question:', error);
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-btn', function() {
+            const questionId = $(this).data('id');
+            $.ajax({
+                url: `/quiz/question/${questionId}/delete`,
+                type: 'DELETE',
+                success: function() {
+                    fetchQuestions();
+                },
+                error: function(error) {
+                    console.log('Error deleting question:', error);
+                }
+            });
+        });
+    });
+
+
+</script>
+</body>
+</html>

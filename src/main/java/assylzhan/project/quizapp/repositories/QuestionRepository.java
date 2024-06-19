@@ -12,10 +12,9 @@ import java.util.List;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-
     List<Question> findByParagraphId(Long paragraphId);
-
-
     @Query(value = "SELECT * FROM questions WHERE paragraph_id = :paragraphId ORDER BY random() LIMIT :limit", nativeQuery = true)
     List<Question> findRandomQuestions(@Param("limit") int limit, @Param("paragraphId") Long paragraphId);
+
+    List<Question> findAllByParagraphId(Long id);
 }

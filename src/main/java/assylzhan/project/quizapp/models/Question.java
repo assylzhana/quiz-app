@@ -21,7 +21,7 @@ public class Question {
     @NotBlank
     private String question;
 
-    @NotBlank
+
     private int time;
 
     @NotBlank

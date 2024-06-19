@@ -1,7 +1,9 @@
 package assylzhan.project.quizapp.controllers;
 
 import assylzhan.project.quizapp.exceptions.NotFoundException;
+import assylzhan.project.quizapp.models.Paragraph;
 import assylzhan.project.quizapp.models.Question;
+import assylzhan.project.quizapp.services.ParagraphService;
 import assylzhan.project.quizapp.services.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,24 +18,25 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-
 @RestController
 @RequestMapping("/quiz")
 public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private ParagraphService paragraphService;
 
-    @PostMapping("/create")
+    @PostMapping("{paragraphId}/create")
     public ResponseEntity<Question> createQuestion(@Valid @RequestBody Question question,
-                                                   @RequestParam Long paragraphId) {
+                                                   @PathVariable Long paragraphId) {
         Question createdQuestion = questionService.createQuestion(question, paragraphId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
     }
 
     @GetMapping("/view")
-    public ResponseEntity<List<Question>> getAllQuestions() {
-        List<Question> questions = questionService.getAllQuestions();
+    public ResponseEntity<List<Question>> getAllQuestions(@RequestParam Long paragraphId) {
+        List<Question> questions = questionService.getAllQuestionsByParagraphId(paragraphId);
         return ResponseEntity.ok(questions);
     }
 
@@ -51,7 +54,6 @@ public class QuestionController {
     public ResponseEntity<Question> updateQuestion(@PathVariable Long id, @Valid @RequestBody Question question) {
         try {
             Question updatedQuestion = questionService.updateQuestion(id, question);
-
             return ResponseEntity.ok(updatedQuestion);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();

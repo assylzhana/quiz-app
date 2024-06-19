@@ -43,8 +43,6 @@ public class ParagraphService {
         }
     }
 
-
-
     public List<Paragraph> findParagraph(String searchTerm) {
         return paragraphRepository.findAllByName(searchTerm);
     }
@@ -55,5 +53,9 @@ public class ParagraphService {
 
     public Paragraph getParagraphByName(String paragraphName) {
         return paragraphRepository.findByName(paragraphName);
+    }
+
+    public Paragraph findParagraphByQuestionId(Long id) {
+        return paragraphRepository.findByQuestionId(id);
     }
 }
