@@ -1,8 +1,10 @@
 package assylzhan.project.quizapp.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,16 +20,18 @@ public class Paragraph {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "theme_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Theme theme;
 
 
     @OneToMany(mappedBy = "paragraph", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Question> questionLists = new ArrayList<>();
 }

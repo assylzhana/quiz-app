@@ -158,15 +158,13 @@
                     postReq.send(JSON.stringify(theme));
 
                     postReq.onload = function () {
-                        if (postReq.status >= 200 && postReq.status < 300) {
+
                             let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
                             modal.hide();
                             document.getElementById('themeName').value = "";
                             document.getElementById('themeDescription').value = "";
                             loadThemes();
-                        } else {
-                            alert("Error adding the theme. Please try again.");
-                        }
+
                     }
                 } else {
                     alert("Theme name or description already exists. Please provide unique values.");

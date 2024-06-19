@@ -85,4 +85,16 @@ public class HomeController {
         model.addAttribute("paragraph", paragraph);
         return "paragraph";
     }
+
+    @GetMapping("/quiz/admin/{id}")
+    public String addQuestions(@PathVariable Long id, Model model){
+        Paragraph paragraph = paragraphService.getParagraphById(id);
+        model.addAttribute("paragraph", paragraph);
+        return "admin-quiz-add";
+    }
+    @GetMapping("/quiz/{paragraphName}/start")
+    public String quizPage(@PathVariable String paragraphName, Model model){
+        Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
+        return "quiz-start";
+    }
 }

@@ -1,6 +1,8 @@
 package assylzhan.project.quizapp.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,20 +18,27 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "question_text", nullable = false, length = 1000)
-    private String questionText;
+    @NotBlank
+    private String question;
+
+    @NotBlank
+    private int time;
+
+    @NotBlank
+    private String questionType;
 
     @ElementCollection
-    @CollectionTable(name = "question_variants", joinColumns = @JoinColumn(name = "question_id"))
-    @OrderColumn(name = "answer_order")
-    @Column(name = "variant")
-    private List<String> questionVariants;
+    @CollectionTable(name = "question_choices", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "choice")
+    private List<String> choices;
 
-    @Column(name = "correct_answer_order", nullable = false)
-    private int correctAnswerOrder;
+    @ElementCollection
+    @CollectionTable(name = "question_correct_answers", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "correct_answer")
+    private List<String> correctAnswers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paragraph_id")
-    @JsonBackReference
+    @JsonIgnore
     private Paragraph paragraph;
 }

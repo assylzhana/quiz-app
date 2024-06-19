@@ -48,11 +48,11 @@
 
 <br>
 <center>
-    <a type="button" class="btn btn-primary">
+    <a type="button" th:href="@{'/quiz/admin/'+${paragraph.id}}" class="btn btn-primary">
         Add questions
     </a>
 
-    <a type="button" class="btn btn-success">
+    <a type="button" th:href="@{'/quiz/'+${paragraph.name}+'/start'}" class="btn btn-success">
         Quiz
     </a>
 </center>
