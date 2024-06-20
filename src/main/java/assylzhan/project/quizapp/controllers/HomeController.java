@@ -2,10 +2,13 @@ package assylzhan.project.quizapp.controllers;
 
 import assylzhan.project.quizapp.models.Course;
 import assylzhan.project.quizapp.models.Paragraph;
+import assylzhan.project.quizapp.models.Question;
 import assylzhan.project.quizapp.models.Theme;
 import assylzhan.project.quizapp.services.CourseService;
 import assylzhan.project.quizapp.services.ParagraphService;
+import assylzhan.project.quizapp.services.QuestionService;
 import assylzhan.project.quizapp.services.ThemeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +29,9 @@ public class HomeController {
 
     @Autowired
     private ThemeService themeService;
+
+    @Autowired
+    private QuestionService questionService;
 
     @GetMapping("/")
     public String homePage(){
@@ -92,9 +98,21 @@ public class HomeController {
         model.addAttribute("paragraph", paragraph);
         return "admin-quiz-add";
     }
+
     @GetMapping("/quiz/{paragraphName}/start")
-    public String quizPage(@PathVariable String paragraphName, Model model){
+    public String quizPage(@PathVariable String paragraphName, Model model) {
         Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
+        List<Question> questions = questionService.getAllQuestionsByParagraphId(paragraph.getId()); // assuming this method exists
+        ObjectMapper objectMapper = new ObjectMapper();
+        String questionsJson = "";
+        try {
+            questionsJson = objectMapper.writeValueAsString(questions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("paragraph", paragraph);
+        model.addAttribute("questionsJson", questionsJson);
         return "quiz-start";
     }
+
 }

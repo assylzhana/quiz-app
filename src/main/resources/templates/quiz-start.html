@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Start</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <script th:inline="javascript">
+        let questionsJson = /*[[${questionsJson}]]*/ '';
+        let questions = JSON.parse(questionsJson);
+        let quizTime = /*[[${paragraph.quizTime}]]*/ 15;
+        let timerInterval;
+
+        $(document).ready(function () {
+            $('#quizModal').modal('show');
+        });
+
+        function startQuiz() {
+            displayQuestions();
+            startTimer();
+            $('#quizModal').modal('hide');
+        }
+
+        function displayQuestions() {
+            let questionsHtml = '';
+            questions.forEach(function (question, index) {
+                let choicesHtml = '';
+                question.choices.forEach(function (choice, choiceIndex) {
+                    let choiceId = 'answer' + index + '-' + choiceIndex;
+                    choicesHtml += '<div class="form-check">';
+                    choicesHtml += '<input class="form-check-input" type="checkbox" name="answer' + index + '" id="' + choiceId + '" value="' + choice + '">';
+                    choicesHtml += '<label class="form-check-label" for="' + choiceId + '">' + choice + '</label>';
+                    choicesHtml += '</div>';
+                });
+                questionsHtml += '<div class="card mt-3">';
+                questionsHtml += '<div class="card-body">';
+                questionsHtml += '<h5 class="card-title">Question ' + (index + 1) + '</h5>';
+                questionsHtml += '<p class="card-text">' + question.question + '</p>';
+                questionsHtml += choicesHtml;
+                questionsHtml += '</div>';
+                questionsHtml += '</div>';
+            });
+            $('#quizQuestions').html(questionsHtml);
+            $('#submitQuizButton').show();
+        }
+
+        function startTimer() {
+            let timeLeft = quizTime * 60;
+            timerInterval = setInterval(function () {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                $('#fixedTimer').text(minutes + 'm ' + seconds + 's');
+                $('#modalTimer').text(minutes + 'm ' + seconds + 's');
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    $('#quizSubmitModal').modal('show');
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            $('#confirmSubmitModal').modal('show');
+        }
+
+        function confirmSubmit() {
+            clearInterval(timerInterval);
+            let totalQuestions = questions.length;
+            let totalScore = 0;
+
+            questions.forEach(function (question, index) {
+                let selectedAnswers = [];
+                $('input[name="answer' + index + '"]:checked').each(function() {
+                    selectedAnswers.push($(this).val());
+                });
+
+                let correctAnswers = question.correctAnswers;
+                let correctCount = 0;
+                let isIncorrectSelected = false;
+
+                selectedAnswers.forEach(function(answer) {
+                    if (correctAnswers.includes(answer)) {
+                        correctCount++;
+                    } else {
+                        isIncorrectSelected = true;
+                    }
+                });
+
+                if (isIncorrectSelected) {
+                    totalScore += 0;
+                } else {
+                    totalScore += (correctCount / correctAnswers.length);
+                }
+            });
+
+            let scorePercentage = (totalScore / totalQuestions) * 100;
+            $('#quizResult').text(scorePercentage.toFixed(2) + '%');
+            $('#confirmSubmitModal').modal('hide');
+            $('#quizResultModal').modal('show');
+        }
+
+        function redirectToEndpoint() {
+            let paragraphName = document.getElementById('paragraphName').value;
+            window.location.href = '/quiz/' + paragraphName;
+        }
+    </script>
+</head>
+<body>
+
+<input type="hidden" id="paragraphName" th:value="${paragraph.name}">
+<div class="modal fade" id="quizModal" tabindex="-1" role="dialog" aria-labelledby="quizModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quizModalLabel">Quiz Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Quiz Topic: <span th:text="${paragraph.name}"></span></p>
+            </div>
+            <div class="modal-body">
+                <p>Quiz Time: <span id="modalTimer" th:text="${paragraph.quizTime}"></span> minutes</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fixed-top bg-light p-2 text-right">
+    <span id="fixedTimer" class="font-weight-bold"></span>
+</div>
+
+<div id="quizQuestions" class="container mt-4">
+    <!-- Questions will be dynamically added here -->
+</div>
+
+<div class="container mt-4">
+    <button id="submitQuizButton" class="btn btn-danger" style="display: none;" onclick="submitQuiz()">Submit Quiz</button>
+</div>
+
+<div class="modal fade" id="confirmSubmitModal" tabindex="-1" role="dialog" aria-labelledby="confirmSubmitModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmSubmitModalLabel">Confirm Submit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to submit the quiz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSubmit()">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="quizResultModal" tabindex="-1" role="dialog" aria-labelledby="quizResultModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quizResultModalLabel">Quiz Result</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Your Score: <span id="quizResult"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="redirectToEndpoint()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

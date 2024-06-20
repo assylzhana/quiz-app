@@ -5,6 +5,7 @@
     <title>Course Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLR92C2t8e1k3K4Ca1lZ3CQO6z9T4XntF1tZ3PeX5T" crossorigin="anonymous"></script>
     <style>
         .card:hover {
             border-color: #f15b2a;
@@ -41,6 +42,7 @@
             <h4 class="card-title">Please read the topic and then pass the quiz</h4>
             <h5 class="card-title" th:text="${paragraph.name}"></h5>
             <p class="card-text" th:text="${paragraph.description}"></p>
+            <span>Quiz time:<p class="card-text" th:if="${paragraph.quizTime != null }" th:text="${paragraph.quizTime}"></p></span>
             <a href="/course" class="card-link">Go to the dashboard</a>
         </div>
     </div>
@@ -55,10 +57,7 @@
     <a type="button" th:href="@{'/quiz/'+${paragraph.name}+'/start'}" class="btn btn-success">
         Quiz
     </a>
-</center>
-<br><br>
 
+</center>
 </body>
 </html>
-
-

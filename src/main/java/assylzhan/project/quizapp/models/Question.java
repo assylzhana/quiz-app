@@ -22,7 +22,6 @@ public class Question {
     private String question;
 
 
-    private int time;
 
     @NotBlank
     private String questionType;

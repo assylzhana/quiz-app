@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/paragraph")
@@ -88,4 +89,5 @@ public class ParagraphController {
         List<Paragraph> foundParagraphs = paragraphService.findParagraph(searchTerm);
         return ResponseEntity.ok(foundParagraphs);
     }
+
 }

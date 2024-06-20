@@ -45,7 +45,7 @@ public class QuestionService {
         existingQuestion.setQuestion(question.getQuestion());
         existingQuestion.setQuestionType(question.getQuestionType());
         existingQuestion.setChoices(question.getChoices());
-        existingQuestion.setTime(question.getTime());
+
         existingQuestion.setCorrectAnswers(question.getCorrectAnswers());
 
         return questionRepository.save(existingQuestion);

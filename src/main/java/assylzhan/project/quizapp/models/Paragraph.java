@@ -30,8 +30,9 @@ public class Paragraph {
     @JsonIgnore
     private Theme theme;
 
-
     @OneToMany(mappedBy = "paragraph", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Question> questionLists = new ArrayList<>();
+
+    private int quizTime = 15;
 }

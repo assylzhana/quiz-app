@@ -72,7 +72,10 @@
                     <label class="form-label">Paragraph</label>
                     <input type="text" class="form-control" name="paragraphName" id="paragraphName">
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">Quiz Time</label>
+                    <input type="text" class="form-control" name="quizTime" id="quizTime">
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Paragraph Description</label>
                     <textarea class="form-control" name="paragraphDescription" id="paragraphDescription"></textarea>
@@ -99,6 +102,11 @@
                 <div class="mb-3">
                     <label class="form-label">Paragraph name</label>
                     <input type="text" class="form-control" name="editParagraphName" id="editParagraphName">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quiz Time</label>
+                    <input type="number" class="form-control" name="editQuizTime" id="editQuizTime">
                 </div>
 
                 <div class="mb-3">
@@ -152,7 +160,7 @@
             html += "<strong class=\"card-title\">" + (i++) + "|</strong>";
             html += "<span class=\"card-text\">" + paragraph.name + "</span>";
             html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraph.id + ")'>Delete</a>";
-            html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\")'>Edit</a>";
+            html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\", \"" + paragraph.quizTime + "\")'>Edit</a>";
             html += "</div>";
             html += "</div>";
             html += "</a>";
@@ -165,6 +173,7 @@
     function addParagraph() {
         let themeId = document.getElementById('addModalThemeIdValue').value;
         let paragraphName = document.getElementById('paragraphName').value;
+        let quizTime = document.getElementById('quizTime').value;
         let paragraphDescription = document.getElementById('paragraphDescription').value;
 
         if (paragraphName.trim() === "" || paragraphDescription.trim() === "") {
@@ -174,7 +183,8 @@
 
         let paragraph = {
             "name": paragraphName,
-            "description": paragraphDescription
+            "description": paragraphDescription,
+            "quizTime" : quizTime
         };
 
         fetch('/paragraph/' + themeId + '/add', {
@@ -188,9 +198,9 @@
                 if (response.ok) {
                     let modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
                     modal.hide();
-
                     document.getElementById('paragraphName').value = "";
                     document.getElementById('paragraphDescription').value = "";
+                    document.getElementById('quizTime').value = "";
                     loadParagraphs();
                 } else {
                     alert("Error adding the paragraph. Please try again.");
@@ -220,9 +230,10 @@
                 });
         }
     }
-    function editParagraph(paragraphId, paragraphName, paragraphDescription) {
+    function editParagraph(paragraphId, paragraphName, paragraphDescription,quizTime) {
         document.getElementById('editModalParagraphId').value = paragraphId;
         document.getElementById('editParagraphName').value = paragraphName;
+        document.getElementById('editQuizTime').value = quizTime;
         document.getElementById('editParagraphDescription').value = paragraphDescription;
 
         let editModal = new bootstrap.Modal(document.getElementById('editModal'));
@@ -231,6 +242,7 @@
     function updateParagraph() {
         let paragraphId = document.getElementById('editModalParagraphId').value;
         let updatedParagraphName = document.getElementById('editParagraphName').value;
+        let updatedQuizTime = document.getElementById('editQuizTime').value;
         let updatedParagraphDescription = document.getElementById('editParagraphDescription').value;
 
         if (updatedParagraphName.trim() === "" || updatedParagraphDescription.trim() === "") {
@@ -240,7 +252,8 @@
 
         let updatedParagraph = {
             "name": updatedParagraphName,
-            "description": updatedParagraphDescription
+            "description": updatedParagraphDescription,
+            "quizTime" : updatedQuizTime
         };
         fetch('/paragraph/' + paragraphId, {
             method: 'PUT',
@@ -253,7 +266,7 @@
                 if (response.ok) {
                     let modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
                     modal.hide();
-                    loadParagraphs(); // Reload paragraphs after update
+                    loadParagraphs();
                 } else {
                     alert("Error updating the paragraph. Please try again.");
                 }
