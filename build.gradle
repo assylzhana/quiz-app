@@ -33,7 +33,9 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
 	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.security:spring-security-web"
+	implementation "org.springframework.security:spring-security-config"
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

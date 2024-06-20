@@ -9,6 +9,7 @@ import assylzhan.project.quizapp.services.ThemeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class ParagraphController {
     @Autowired
     private ParagraphService paragraphService;
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{themeId}")
     public ResponseEntity<List<Paragraph>> viewParagraphs(@PathVariable Long themeId) {
         Theme theme = themeService.findThemeById(themeId);
@@ -38,7 +40,7 @@ public class ParagraphController {
         return ResponseEntity.ok(paragraphs);
     }
 
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/{themeId}/add")
     public ResponseEntity<Paragraph> addParagraphToTheme(@PathVariable Long themeId, @RequestBody Paragraph paragraph) {
         Theme theme = themeService.findThemeById(themeId);
@@ -52,7 +54,7 @@ public class ParagraphController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedParagraph);
     }
 
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Paragraph> updateParagraph(@PathVariable Long id, @RequestBody Paragraph updatedParagraph) {
         Paragraph paragraph = paragraphService.getParagraphById(id);
@@ -66,7 +68,7 @@ public class ParagraphController {
         Paragraph savedParagraph = paragraphService.updateParagraph(paragraph);
         return ResponseEntity.ok(savedParagraph);
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParagraph(@PathVariable Long id) {
         Paragraph paragraph = paragraphService.getParagraphById(id);

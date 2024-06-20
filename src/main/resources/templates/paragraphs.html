@@ -24,7 +24,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/panel">Profile</a>
+                    <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"  th:href="${'/course'}">Course</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/support">Support</a>
@@ -52,9 +55,10 @@
 
 <br>
 <center>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+    <button  th:if="${user.role.name == 'ROLE_ADMIN'}" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
         Add new Paragraph
     </button>
+    <input type="hidden" id="role" th:value="${user.role.name}">
 </center>
 <br><br>
 <!-- Modal -->
@@ -152,6 +156,7 @@
         paragraphs.sort((a, b) => a.id - b.id);
         let html = "";
         let i = 1;
+        const role = document.getElementById('role').value;
 
         paragraphs.forEach(paragraph => {
             html += "<a style=\"text-decoration: none\"  href=\"/quiz/"   +  paragraph.name + "\">";
@@ -159,8 +164,10 @@
             html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
             html += "<strong class=\"card-title\">" + (i++) + "|</strong>";
             html += "<span class=\"card-text\">" + paragraph.name + "</span>";
-            html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraph.id + ")'>Delete</a>";
-            html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\", \"" + paragraph.quizTime + "\")'>Edit</a>";
+            if ( role =='USER_ADMIN'){
+                html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraph.id + ")'>Delete</a>";
+                html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\", \"" + paragraph.quizTime + "\")'>Edit</a>";
+            }
             html += "</div>";
             html += "</div>";
             html += "</a>";

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -27,6 +28,7 @@ public class QuestionController {
     @Autowired
     private ParagraphService paragraphService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("{paragraphId}/create")
     public ResponseEntity<Question> createQuestion(@Valid @RequestBody Question question,
                                                    @PathVariable Long paragraphId) {
@@ -49,7 +51,7 @@ public class QuestionController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/question/{id}/update")
     public ResponseEntity<Question> updateQuestion(@PathVariable Long id, @Valid @RequestBody Question question) {
         try {
@@ -59,7 +61,7 @@ public class QuestionController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/question/{id}/delete")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
         questionService.deleteQuestion(id);

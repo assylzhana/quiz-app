@@ -24,7 +24,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/panel">Profile</a>
+                    <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"  th:href="${'/course'}">Course</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/support">Support</a>
@@ -51,9 +54,10 @@
 </center>
 <br>
 <center>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+    <button type="button" th:if="${user.role.name == 'ROLE_ADMIN'}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
         Add new Theme
     </button>
+    <input type="hidden" id="role" th:value="${user.role.name}">
 </center>
 <br><br>
 <!-- Modal -->
@@ -178,6 +182,8 @@
     function loadThemes() {
         let courseId = document.getElementById('courseId').value;
         let courseName = document.getElementById('courseName').value;
+        let role = document.getElementById('role').value;
+
         let req = new XMLHttpRequest();
         req.open("GET", "/theme/" + courseId);
         req.send();
@@ -192,8 +198,10 @@
                     html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
                     html += "<strong class=\"card-title\">" + (i + 1) + "|</strong>";
                     html += "<span class=\"card-text\">" + themes[i].name + "</span>";
-                    html += "<a class=\"btn btn-warning btn-sm\" style=\"float: right\" onclick=\"deleteTheme(" + themes[i].id + ")\">Delete</a>";
-                    html += "<a class=\"btn btn-success btn-sm\" style=\"float: right\" onclick=\"editTheme(" + themes[i].id + ", '" + themes[i].name + "', '" + themes[i].description + "')\">Edit</a>";
+                    if(role == 'ROLE_ADMIN'){
+                        html += "<a class=\"btn btn-warning btn-sm\" style=\"float: right\" onclick=\"deleteTheme(" + themes[i].id + ")\">Delete</a>";
+                        html += "<a class=\"btn btn-success btn-sm\" style=\"float: right\" onclick=\"editTheme(" + themes[i].id + ", '" + themes[i].name + "', '" + themes[i].description + "')\">Edit</a>";
+                    }
                     html += "</div>";
                     html += "</div>";
                     html += "</a>";

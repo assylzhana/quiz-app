@@ -18,11 +18,9 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "course_name", nullable = false, unique = true)
-    @NotBlank
     private String name;
 
     @Column(name = "course_explanation", nullable = false, length = 1000)
-    @NotBlank
     private String explanation;
 
     @OneToMany(cascade = CascadeType.ALL)

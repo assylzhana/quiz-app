@@ -10,3 +10,5 @@ spring:
     url: jdbc:postgresql://localhost:5432/quiz
     username: postgres
     password: asylka225
+server:
+  port: 3000

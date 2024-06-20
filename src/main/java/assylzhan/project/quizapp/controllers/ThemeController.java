@@ -7,6 +7,7 @@ import assylzhan.project.quizapp.services.ThemeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class ThemeController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/{courseId}")
     public ResponseEntity<Theme> addThemeToCourse(@PathVariable Long courseId, @RequestBody Theme theme) {
         Course course = courseService.findCourseById(courseId);
@@ -41,6 +43,7 @@ public class ThemeController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Theme> updateTheme(@PathVariable Long id, @RequestBody Theme updatedTheme) {
         Theme existingTheme = themeService.getById(id);
@@ -52,7 +55,7 @@ public class ThemeController {
         Theme savedTheme = themeService.updateTheme(existingTheme);
         return new ResponseEntity<>(savedTheme, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteTheme(@PathVariable Long id) {
         themeService.removeThemeFromCourses(id);

@@ -1,13 +1,7 @@
 package assylzhan.project.quizapp.controllers;
 
-import assylzhan.project.quizapp.models.Course;
-import assylzhan.project.quizapp.models.Paragraph;
-import assylzhan.project.quizapp.models.Question;
-import assylzhan.project.quizapp.models.Theme;
-import assylzhan.project.quizapp.services.CourseService;
-import assylzhan.project.quizapp.services.ParagraphService;
-import assylzhan.project.quizapp.services.QuestionService;
-import assylzhan.project.quizapp.services.ThemeService;
+import assylzhan.project.quizapp.models.*;
+import assylzhan.project.quizapp.services.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -33,7 +28,10 @@ public class HomeController {
 
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private UserService userService;
 
+    @PreAuthorize("isAnonymous()")
     @GetMapping("/")
     public String homePage(){
         return "home";
@@ -41,27 +39,48 @@ public class HomeController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String profile(){
+    public String profile(Model model){
+        model.addAttribute("user", userService.getCurrentUser());
         return "profile";
     }
 
+    @PreAuthorize("isAnonymous()")
     @GetMapping("/sign-up")
     public String signUp(){
         return "sign-up";
     }
 
+    @PreAuthorize("isAnonymous()")
+    @PostMapping("/sign-up")
+    public String register(User user){
+        userService.addUser(user);
+        return "redirect:/sign-in";
+    }
+
+    @PreAuthorize("isAnonymous()")
     @GetMapping("/sign-in")
     public String signIn(){
         return "sign-in";
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/support")
     public String supportPage(){
         return "support";
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/settings")
+    public String settings(Model model){
+        model.addAttribute("user", userService.getCurrentUser());
+        return "settings";
+    }
+
+
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/course")
-    public String coursePage(){
+    public String coursePage(Model model){
+        model.addAttribute("user", userService.getCurrentUser());
         return "course";
     }
 
@@ -75,13 +94,17 @@ public class HomeController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/course/{name}")
     public String courseName(@PathVariable String name,
                              Model model){
         Course course = courseService.getCourseByName(name);
         model.addAttribute("course", course);
+        model.addAttribute("user", userService.getCurrentUser());
         return "themes";
     }
+
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/course/{courseName}/{themeName}")
     public String paragraph(@PathVariable(name = "courseName") String courseName,
                             @PathVariable(name = "themeName") String themeName,
@@ -98,24 +121,28 @@ public class HomeController {
         }
         model.addAttribute("course", course);
         model.addAttribute("theme", theme);
+        model.addAttribute("user", userService.getCurrentUser());
         return "paragraphs";
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/quiz/{paragraphName}")
     public String paragraph(@PathVariable(name = "paragraphName") String paragraphName,
                             Model model){
         Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
         model.addAttribute("paragraph", paragraph);
+        model.addAttribute("user", userService.getCurrentUser());
         return "paragraph";
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/quiz/admin/{id}")
     public String addQuestions(@PathVariable Long id, Model model){
         Paragraph paragraph = paragraphService.getParagraphById(id);
         model.addAttribute("paragraph", paragraph);
         return "admin-quiz-add";
     }
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/quiz/{paragraphName}/start")
     public String quizPage(@PathVariable String paragraphName, Model model) {
         Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
