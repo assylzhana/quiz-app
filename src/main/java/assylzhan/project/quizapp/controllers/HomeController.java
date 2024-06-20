@@ -10,6 +10,7 @@ import assylzhan.project.quizapp.services.QuestionService;
 import assylzhan.project.quizapp.services.ThemeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,22 @@ public class HomeController {
     @GetMapping("/")
     public String homePage(){
         return "home";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    public String profile(){
+        return "profile";
+    }
+
+    @GetMapping("/sign-up")
+    public String signUp(){
+        return "sign-up";
+    }
+
+    @GetMapping("/sign-in")
+    public String signIn(){
+        return "sign-in";
     }
 
     @GetMapping("/support")
