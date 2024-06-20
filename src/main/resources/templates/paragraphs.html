@@ -158,21 +158,21 @@
         let i = 1;
         const role = document.getElementById('role').value;
 
-        paragraphs.forEach(paragraph => {
-            html += "<a style=\"text-decoration: none\"  href=\"/quiz/"   +  paragraph.name + "\">";
+        for (let j = 0; j < paragraphs.length; j++) {
+            html += "<a style=\"text-decoration: none\"  href=\"/quiz/"   +  paragraphs[j].name + "\">";
             html += "<div class=\"card\">";
             html += "<div class=\"card-body\" style=\"padding: 10px; border: 1px solid #f15b2a; border-radius: 5px;\">";
             html += "<strong class=\"card-title\">" + (i++) + "|</strong>";
-            html += "<span class=\"card-text\">" + paragraph.name + "</span>";
-            if ( role =='USER_ADMIN'){
-                html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraph.id + ")'>Delete</a>";
-                html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraph.id + ", \"" + paragraph.name + "\", \"" + paragraph.description + "\", \"" + paragraph.quizTime + "\")'>Edit</a>";
+            html += "<span class=\"card-text\">" + paragraphs[j].name + "</span>";
+            if (role == 'ROLE_ADMIN') {
+                html += "<a class='btn btn-warning btn-sm' style=\"float: right\"  onclick='deleteParagraph(" + paragraphs[j].id + ")'>Delete</a>";
+                html += "<a class='btn btn-success btn-sm' style=\"float: right\" onclick='editParagraph(" + paragraphs[j].id + ", \"" + paragraphs[j].name + "\", \"" + paragraphs[j].description + "\", \"" + paragraphs[j].quizTime + "\")'>Edit</a>";
             }
             html += "</div>";
             html += "</div>";
             html += "</a>";
             html += "</br>";
-        });
+            }
         document.getElementById('paragraphContainer').innerHTML = html;
     }
 

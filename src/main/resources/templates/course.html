@@ -20,7 +20,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="loadCourses()">
 
 <nav class="navbar navbar-expand-lg" style="background-color: #f15b2a">
     <div class="container-fluid">
@@ -82,7 +82,6 @@
             Add new Course
         </button>
     </div>
-
     <input type="hidden" id="role" th:value="${user.role.name}">
     <br>
     <div class="row" id="courseData">
@@ -91,39 +90,41 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        loadCourses();
-    });
 
     function loadCourses() {
-        fetch('/course/view')
-            .then(response => response.json())
-            .then(data => {
-                displayCourses(data);
-            });
-    }
-
-    function displayCourses(courses) {
-        let userRole = document.getElementById('role').value;
-        let html = '';
-        for (let i = 0; i < courses.length; i++) {
-            html += "<div class=\"col-md-4 mb-4\">";
-            html += "<div class=\"card text-center fixed-card\">";
-            html += "<div class=\"card-header\" style=\"color: #f15b2a\">" + (i + 1) + "</div>";
-            html += "<div class=\"card-body\">";
-            html += "<h5 class=\"card-title\">" + courses[i].name + "</h5>";
-            html += "<p class=\"card-text\">" + courses[i].explanation + "</p>";
-            html += "</div>";
-            html += "<div class=\"card-footer text-muted\">";
-            if (userRole === 'ROLE_ADMIN') {
-                html += "<a class=\"btn btn-warning btn-sm\" onclick=\"deleteCourse(" + courses[i].id + ")\">Delete</a>";
+        let role = document.getElementById('role').value;
+        let req = new XMLHttpRequest();
+        req.open("GET", "/course/view");
+        req.send();
+        req.onload = function () {
+            if (req.status >= 200 && req.status < 300) {
+                let courses = JSON.parse(req.responseText);
+                courses.sort((a, b) => a.id - b.id);
+                let html = "";
+                for (let i = 0; i < courses.length; i++) {
+                    html += "<div class=\"col-md-4 mb-4\">";
+                    html += "<div class=\"card text-center fixed-card\">";
+                    html += "<div class=\"card-header\" style=\"color: #f15b2a\">" + (i + 1) + "</div>";
+                    html += "<div class=\"card-body\">";
+                    html += "<h5 class=\"card-title\">" + courses[i].name + "</h5>";
+                    html += "<p class=\"card-text\">" + courses[i].explanation + "</p>";
+                    html += "</div>";
+                    html += "<div class=\"card-footer text-muted\">";
+                    if (role == 'ROLE_ADMIN') {
+                        html += "<a class=\"btn btn-warning btn-sm\" onclick=\"deleteCourse(" + courses[i].id + ")\">Delete</a>";
+                    }
+                    html += "<a class=\"btn btn-success btn-sm\" href=\"/course/" + courses[i].name + "\">Start</a>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "</div>";
+                }
+                document.getElementById('courseData').innerHTML = html;
             }
-            html += "<a class=\"btn btn-success btn-sm\" href=\"/course/" + courses[i].name + "\">Start</a>";
-            html += "</div>";
-            html += "</div>";
-            html += "</div>";
+            else {
+                alert("Error loading courses. Please try again.");
+            }
         }
-        document.getElementById('courseData').innerHTML = html;
+
     }
 
     function addCourse() {
@@ -184,9 +185,28 @@
             fetch('/course/search?searchTerm=' + encodeURIComponent(searchTerm))
                 .then(response => response.json())
                 .then(data => {
-                    displayCourses(data);
+                    displaySearchCourses(data);
                 });
         }
+    }
+    function displaySearchCourses(courses) {
+        let html = "";
+        let i=1;
+        courses.forEach(course => {
+            html += "<div class=\"col-md-4 mb-4\">";
+            html += "<div class=\"card text-center fixed-card\">";
+            html += "<div class=\"card-header\" style=\"color: #f15b2a\">" + (i++) + "</div>";
+            html += "<div class=\"card-body\">";
+            html += "<h5 class=\"card-title\">" + course.name + "</h5>";
+            html += "<p class=\"card-text\">" + course.explanation + "</p>";
+            html += "</div>";
+            html += "<div class=\"card-footer text-muted\">";
+            html += "<a class=\"btn btn-success btn-sm\" href=\"/course/" + course.name + "\">Start</a>";
+            html += "</div>";
+            html += "</div>";
+            html += "</div>";
+        });
+        document.getElementById('courseData').innerHTML = html;
     }
 </script>
 </body>
