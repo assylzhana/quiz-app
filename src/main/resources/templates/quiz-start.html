@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <title>Quiz Start</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
+          crossorigin="anonymous">
+    <!-- Correct jQuery inclusion without integrity attribute -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
     <script th:inline="javascript">
         let questionsJson = /*[[${questionsJson}]]*/ '';
@@ -100,9 +98,22 @@
             });
 
             let scorePercentage = (totalScore / totalQuestions) * 100;
-            $('#quizResult').text(scorePercentage.toFixed(2) + '%');
-            $('#confirmSubmitModal').modal('hide');
-            $('#quizResultModal').modal('show');
+            let paragraphName = document.getElementById('paragraphName').value;
+            $.ajax({
+                type: 'POST',
+                url: '/user/submit',
+                data: { score: scorePercentage,
+                    paragraphName: paragraphName },
+                success: function() {
+                    console.log('Score submitted successfully');
+                    $('#quizResult').text(scorePercentage.toFixed(2) + '%');
+                    $('#confirmSubmitModal').modal('hide');
+                    $('#quizResultModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error submitting score: ', error);
+                }
+            });
         }
 
         function redirectToEndpoint() {
@@ -127,6 +138,7 @@
             <div class="modal-body">
                 <p>Quiz Topic: <span th:text="${paragraph.name}"></span></p>
             </div>
+            <input type="hidden" id="paragraphId" th:value="${paragraph.name}">
             <div class="modal-body">
                 <p>Quiz Time: <span id="modalTimer" th:text="${paragraph.quizTime}"></span> minutes</p>
             </div>

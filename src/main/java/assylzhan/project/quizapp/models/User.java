@@ -29,7 +29,7 @@ public class User implements UserDetails {
 
     private String password;
 
-    private int totalScore = 0;
+    private int totalScore;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

@@ -3,6 +3,7 @@ package assylzhan.project.quizapp.services;
 import assylzhan.project.quizapp.models.User;
 import assylzhan.project.quizapp.repositories.RoleRepository;
 import assylzhan.project.quizapp.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
@@ -40,4 +42,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
 }

@@ -1,12 +1,9 @@
 package assylzhan.project.quizapp.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +12,8 @@ import java.util.List;
 @Table(name = "paragraphs")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Paragraph {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +34,8 @@ public class Paragraph {
     private List<Question> questionLists = new ArrayList<>();
 
     private int quizTime = 15;
+
+    public Paragraph(Long paragraphId) {
+        this.id = paragraphId;
+    }
 }

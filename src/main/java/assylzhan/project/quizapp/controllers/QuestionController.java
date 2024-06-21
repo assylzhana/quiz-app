@@ -3,14 +3,20 @@ package assylzhan.project.quizapp.controllers;
 import assylzhan.project.quizapp.exceptions.NotFoundException;
 import assylzhan.project.quizapp.models.Paragraph;
 import assylzhan.project.quizapp.models.Question;
+import assylzhan.project.quizapp.models.User;
+import assylzhan.project.quizapp.models.UserQuizScore;
 import assylzhan.project.quizapp.services.ParagraphService;
 import assylzhan.project.quizapp.services.QuestionService;
+import assylzhan.project.quizapp.services.UserQuizScoreService;
+import assylzhan.project.quizapp.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -27,6 +33,10 @@ public class QuestionController {
     private QuestionService questionService;
     @Autowired
     private ParagraphService paragraphService;
+    @Autowired
+    private UserQuizScoreService userQuizScoreService;
+    @Autowired
+    private UserService userService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("{paragraphId}/create")
@@ -74,4 +84,5 @@ public class QuestionController {
         List<Question> randomQuestions = questionService.getQuestionsForUser(numOfQuestions, paragraphId);
         return ResponseEntity.ok(randomQuestions);
     }
+
 }

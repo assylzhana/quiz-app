@@ -30,6 +30,8 @@ public class HomeController {
     private QuestionService questionService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserQuizScoreService userQuizScoreService;
 
     @PreAuthorize("isAnonymous()")
     @GetMapping("/")
@@ -130,10 +132,14 @@ public class HomeController {
     public String paragraph(@PathVariable(name = "paragraphName") String paragraphName,
                             Model model){
         Paragraph paragraph = paragraphService.getParagraphByName(paragraphName);
+        User user = userService.getCurrentUser();
+        int userQuizScore = userQuizScoreService.getUserQuizScore(user.getId(), paragraph.getId());
         model.addAttribute("paragraph", paragraph);
-        model.addAttribute("user", userService.getCurrentUser());
+        model.addAttribute("user", user);
+        model.addAttribute("userQuizScore", userQuizScore);
         return "paragraph";
     }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/quiz/admin/{id}")

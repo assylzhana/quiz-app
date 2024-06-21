@@ -46,6 +46,7 @@
             <h5 class="card-title" th:text="${paragraph.name}"></h5>
             <p class="card-text" th:text="${paragraph.description}"></p>
             <span>Quiz time:<p class="card-text" th:if="${paragraph.quizTime != null }" th:text="${paragraph.quizTime}"></p></span>
+            <h4 class="card-title">Your Score for this quiz : <span th:text="${userQuizScore}"></span> </h4>
             <a href="/course" class="card-link">Go to the dashboard</a>
         </div>
     </div>
