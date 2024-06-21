@@ -4,11 +4,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
+    generate-ddl: false
   datasource:
     url: jdbc:postgresql://localhost:5432/quiz
     username: postgres
     password: asylka225
+  flyway:
+    url: jdbc:postgresql://localhost:5432/quiz
+    user: postgres
+    password: asylka225
+    locations: classpath:db/migration
 server:
   port: 3000
