@@ -123,24 +123,35 @@
                             <h5>Email</h5>
                         </div>
                         <div class="col-md-9 text-secondary" th:text="${user.email}">
+                        </div>
+                    </div>
+                    <hr>
 
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Role</h5>
+                        </div>
+                        <div class="col-md-9 text-secondary" th:text="${user.role.name}">
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card mb-3 content">
+            <div th:if="${paragraphScores != null}">
+            <div class="card mb-3 content" th:each="paragraphScore : ${paragraphScores}">
                 <h1 class="m-3">Recent Quizzes</h1>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <h5>Section Name</h5>
+                            <h5><span th:text="${paragraphScore.paragraphName}"></span></h5>
                         </div>
                         <div class="col-md-3 text-secondary">
-                            Quiz name
+                            <span th:text="${paragraphScore.score}"></span> points
                         </div>
                     </div>
                 </div>
             </div>
+            </div>
+
         </div>
     </div>
 </div>

@@ -1,5 +1,6 @@
 package assylzhan.project.quizapp.controllers;
 
+import assylzhan.project.quizapp.dto.ParagraphScoreDTO;
 import assylzhan.project.quizapp.models.*;
 import assylzhan.project.quizapp.services.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,8 +42,12 @@ public class HomeController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String profile(Model model){
-        model.addAttribute("user", userService.getCurrentUser());
+    public String profile(Model model) {
+        User currentUser = userService.getCurrentUser();
+        model.addAttribute("user", currentUser);
+
+        List<ParagraphScoreDTO> paragraphScores = userQuizScoreService.findParagraphsAndScoresByUser(currentUser);
+        model.addAttribute("paragraphScores", paragraphScores);
         return "profile";
     }
 
@@ -70,6 +75,7 @@ public class HomeController {
     public String supportPage(){
         return "support";
     }
+
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/settings")
