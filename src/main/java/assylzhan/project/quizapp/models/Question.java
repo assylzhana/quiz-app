@@ -21,8 +21,6 @@ public class Question {
     @NotBlank
     private String question;
 
-
-
     @NotBlank
     private String questionType;
 
