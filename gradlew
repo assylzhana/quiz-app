@@ -247,3 +247,6 @@ eval "set -- $(
     )" '"$@"'
 
 exec "$JAVACMD" "$@"
+
+
+./gradlew flywayMigrate
