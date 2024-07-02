@@ -22,8 +22,6 @@ spring:
     show-sql: true
     generate-ddl: false
 
-server:
-  port: 3000
 
 logging:
   level:

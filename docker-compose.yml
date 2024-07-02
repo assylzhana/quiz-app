@@ -1,0 +1,26 @@
+services:
+  backend:
+    image: 'app'
+    container_name: 'backend'
+    depends_on:
+      - database
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_FLYWAY_URL=jdbc:postgresql://database:5432/postgres
+      - SPRING_FLYWAY_USER=postgres
+      - SPRING_FLYWAY_PASSWORD=postgres
+      - SPRING_FLYWAY_LOCATIONS=classpath:db/migration
+    ports:
+      - 8000:8080
+
+  database:
+    image: 'postgres'
+    container_name: 'app-db'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 1234:5432
