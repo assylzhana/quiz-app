@@ -129,8 +129,12 @@ VALUES
     (1,'ROLE_ADMIN'),
     (2,'ROLE_USER');
 
-INSERT INTO users (id, email, password, total_score, username, role_id)
-VALUES (1, 'kabibullaasylzhan@gmail.com', '$2a$10$LcToW3M54oTH6iWmRK5ZmOCY2vAw0wEk3O3XFpWnYp.EVMHoe7NFG', 0, 'assylzhana', 1);
+INSERT INTO users ( email, password, total_score, username, role_id)
+VALUES ('assylum@gmail.com', '$2a$12$lVtMe8kr0L3xJwOwwaWUdeKWm1PU/tdEXr52xPz/bxZGdjFtky1zK', 0, 'admin', 1);
+
+
+INSERT INTO users ( email, password, total_score, username, role_id)
+VALUES ( 'assylum2@gmail.com', '$2a$12$lVtMe8kr0L3xJwOwwaWUdeKWm1PU/tdEXr52xPz/bxZGdjFtky1zK', 0, 'assylum', 2);
 
 
 

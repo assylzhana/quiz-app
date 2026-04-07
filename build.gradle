@@ -5,7 +5,7 @@ plugins {
 	id 'org.flywaydb.flyway' version '8.5.6'
 }
 
-group = 'assylzhan.project'
+group = 'security.project'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -39,7 +39,7 @@ dependencies {
 	implementation "org.springframework.security:spring-security-web"
 	implementation "org.springframework.security:spring-security-config"
 	implementation 'org.flywaydb:flyway-core'
-	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -50,15 +50,4 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-springBoot {
-	flyway {
-		url = 'jdbc:postgresql://localhost:5432/quiz'
-		user = 'postgres'
-		password = 'asylka225'
-		locations = ['classpath:db/migration']
-		baselineOnMigrate = true
-		schemas = ['public']
-	}
 }

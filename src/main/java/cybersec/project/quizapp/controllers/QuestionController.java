@@ -1,0 +1,78 @@
+package cybersec.project.quizapp.controllers;
+
+import cybersec.project.quizapp.exceptions.NotFoundException;
+import cybersec.project.quizapp.models.Question;
+import cybersec.project.quizapp.services.ParagraphService;
+import cybersec.project.quizapp.services.QuestionService;
+import cybersec.project.quizapp.services.UserQuizScoreService;
+import cybersec.project.quizapp.services.UserService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/quiz")
+public class QuestionController {
+
+    @Autowired
+    private QuestionService questionService;
+    @Autowired
+    private ParagraphService paragraphService;
+    @Autowired
+    private UserQuizScoreService userQuizScoreService;
+    @Autowired
+    private UserService userService;
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("{paragraphId}/create")
+    public ResponseEntity<Question> createQuestion(@Valid @RequestBody Question question,
+                                                   @PathVariable Long paragraphId) {
+        Question createdQuestion = questionService.createQuestion(question, paragraphId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
+    }
+
+    @GetMapping("/view")
+    public ResponseEntity<List<Question>> getAllQuestions(@RequestParam Long paragraphId) {
+        List<Question> questions = questionService.getAllQuestionsByParagraphId(paragraphId);
+        return ResponseEntity.ok(questions);
+    }
+
+    @GetMapping("/question/{id}")
+    public ResponseEntity<Question> getQuestionById(@PathVariable Long id) {
+        try {
+            Question question = questionService.getQuestionById(id);
+            return ResponseEntity.ok(question);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/question/{id}/update")
+    public ResponseEntity<Question> updateQuestion(@PathVariable Long id, @Valid @RequestBody Question question) {
+        try {
+            Question updatedQuestion = questionService.updateQuestion(id, question);
+            return ResponseEntity.ok(updatedQuestion);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/question/{id}/delete")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
+        questionService.deleteQuestion(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/fetch-questions")
+    public ResponseEntity<List<Question>> getQuestionsForUser(@RequestParam Integer numOfQuestions,
+                                                              @RequestParam Long paragraphId) {
+        List<Question> randomQuestions = questionService.getQuestionsForUser(numOfQuestions, paragraphId);
+        return ResponseEntity.ok(randomQuestions);
+    }
+
+}
